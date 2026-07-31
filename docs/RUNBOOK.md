@@ -92,6 +92,24 @@ docker exec career-quest-postgres psql -U <POSTGRES_USER> -d <POSTGRES_DB> -c ^
   "SELECT a.application_id, u.name, j.title, c.name AS company, a.status FROM applications a JOIN users u ON u.user_id=a.user_id JOIN jobs j ON j.job_id=a.job_id JOIN companies c ON c.company_id=j.company_id;"
 ```
 
+## 7. Run the API (Issue #2)
+
+```
+uvicorn app.main:app --reload --port 8000
+```
+
+Endpoints (no auth yet — each request explicitly passes the `user_id` it acts on):
+
+- `POST /resumes` — body `{"user_id": 1, "title": "..."}` — 404 if the user doesn't exist
+- `GET /resumes?user_id=1` — lists that user's resumes
+- `POST /jobs` — body `{"company_name": "...", "title": "...", "description"?, "url"?, "location"?}` —
+  looks up the company by exact name or creates it, then creates the job
+- `PATCH /applications/{application_id}/status` — body `{"status": "saved"|"applied"|"interviewing"|"offer"|"rejected"}` —
+  404 if the application doesn't exist; transitioning to `applied` sets `applied_at` if it isn't already set
+- `GET /health` — liveness check
+
+Interactive docs at `http://127.0.0.1:8000/docs`.
+
 ## Tearing down
 
 ```
