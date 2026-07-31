@@ -110,3 +110,8 @@ docker compose down -v     # stop and delete the data volume
   optional `application_id`.
 - `ResumeVersion.snapshot_json` stores the full structured resume snapshot (experience,
   skills, education) as JSON so historical versions remain immutable.
+- Deleting a `Company` does not cascade to its `Job`s (and therefore not to
+  `Application`s or `Note`s) — a user's application history must survive company
+  cleanup. `Job.company_id` is required, so deleting a `Company` with existing jobs
+  fails outright rather than silently deleting the jobs/applications/notes under it;
+  reassign or remove its jobs first.

@@ -14,4 +14,4 @@ class Company(Base):
     website: Mapped[str | None] = mapped_column(String(500))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    jobs: Mapped[list["Job"]] = relationship(back_populates="company", cascade="all, delete-orphan")
+    jobs: Mapped[list["Job"]] = relationship(back_populates="company")

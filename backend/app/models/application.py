@@ -23,7 +23,9 @@ class Application(Base):
     job_id: Mapped[int] = mapped_column(ForeignKey("jobs.job_id"), nullable=False)
     resume_version_id: Mapped[int | None] = mapped_column(ForeignKey("resume_versions.resume_version_id"))
     status: Mapped[ApplicationStatus] = mapped_column(
-        Enum(ApplicationStatus, name="application_status"), nullable=False, default=ApplicationStatus.SAVED
+        Enum(ApplicationStatus, name="application_status", values_callable=lambda enum_cls: [e.value for e in enum_cls]),
+        nullable=False,
+        default=ApplicationStatus.SAVED,
     )
     applied_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

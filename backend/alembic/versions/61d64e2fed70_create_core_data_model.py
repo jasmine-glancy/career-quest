@@ -1,8 +1,8 @@
 """create core data model
 
-Revision ID: 708511a876fb
+Revision ID: 61d64e2fed70
 Revises: 
-Create Date: 2026-07-31 18:51:14.692505
+Create Date: 2026-07-31 19:37:36.108335
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '708511a876fb'
+revision: str = '61d64e2fed70'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -82,7 +82,7 @@ def upgrade() -> None:
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('job_id', sa.Integer(), nullable=False),
     sa.Column('resume_version_id', sa.Integer(), nullable=True),
-    sa.Column('status', sa.Enum('SAVED', 'APPLIED', 'INTERVIEWING', 'OFFER', 'REJECTED', name='application_status'), nullable=False),
+    sa.Column('status', sa.Enum('saved', 'applied', 'interviewing', 'offer', 'rejected', name='application_status'), nullable=False),
     sa.Column('applied_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['job_id'], ['jobs.job_id'], ),
