@@ -110,6 +110,20 @@ Endpoints (no auth yet — each request explicitly passes the `user_id` it acts 
 
 Interactive docs at `http://127.0.0.1:8000/docs`.
 
+## 8. Run the tests
+
+```
+pip install -r requirements-dev.txt
+pytest
+```
+
+Tests run against a separate `career_quest_test` database on the same Postgres
+container (created automatically on first run) — they never touch your dev data.
+Each test truncates all tables afterward for isolation. Covers the Issue #1 data
+model (relationships, the `ApplicationStatus` casing, the company-deletion cascade
+guard) and the Issue #2 API (all four endpoints, error paths, and a real concurrent
+request test for the company get-or-create race).
+
 ## Tearing down
 
 ```
