@@ -140,6 +140,39 @@ model (relationships, the `ApplicationStatus` casing, the company-deletion casca
 guard) and the Issue #2 API (all four endpoints, error paths, and a real concurrent
 request test for the company get-or-create race).
 
+## 9. Run the frontend (Issue #10)
+
+```
+cd frontend
+npm install
+npm run dev
+```
+
+Opens on `http://localhost:3000`. The backend must already be running (steps 2-4
+above) — the frontend reads `NEXT_PUBLIC_API_BASE_URL` from `frontend/.env.local`
+(copy `frontend/.env.example` if it doesn't exist yet; defaults to
+`http://localhost:8000`). There's still no auth layer, so every page acts as the
+seeded dev user (`DEV_USER_ID = 1` in `src/lib/config.ts`).
+
+Pages: `/applications` (table), `/resumes` (list with version history), `/pipeline`
+(kanban board — drag a card to change its status; illegal moves are rejected by the
+backend and the card snaps back with an error banner).
+
+### Theme
+
+Light/dark is auto-detected from the OS by default, with a manual toggle (top
+right of the nav) that overrides it and persists via `localStorage`. Colors live
+as CSS custom properties in `src/app/globals.css`:
+
+- **Accent** (nav, links, buttons) — Raspberry, `#a02c5e` light / `#ef7ab0` dark
+- **Pipeline stages** — Saved/Applied/Interviewing are one blue hue stepped
+  light→dark (mode-invariant); Offer is a solid teal fill (`#007a5e`); Rejected is
+  a border/icon accent, not a fill (`#855000` light / `#d4a03f` dark) — a solid
+  red-family badge read as alarming when several rejections stack up
+- Every color pairing here was checked with a colorblind (protanopia/deuteranopia)
+  simulator and WCAG contrast, not eyeballed — see the palette-selection
+  conversation for the full reasoning if these ever need revisiting
+
 ## Tearing down
 
 ```

@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  --surface: #ffffff;
+  --plane: #f9f9f7;
+  --card: #ffffff;
+  --ink: #0b0b0b;
+  --ink-secondary: #52514e;
+  --ink-muted: #898781;
+  --border: rgba(11, 11, 11, 0.10);
+
+  /* Raspberry accent: separate light/dark steps, same reasoning as the
+     stage colors below — a button's contrast doesn't depend on the page
+     behind it, but a link/text color sitting directly on the page does. */
+  --accent-lm: #a02c5e;
+  --accent-dm: #ef7ab0;
+  --accent: var(--accent-lm);
+  --accent-solid: var(--accent-lm);
+
+  /* Pipeline stages. Saved/Applied/Interviewing are one hue (blue) stepped
+     light->dark, so progress reads from lightness, not color. Offer is a
+     solid fill (mode-invariant). Rejected is a border/icon accent like the
+     ordinal stages, so it needs its own light/dark step. */
+  --stage-saved: #86b6ef;
+  --stage-applied: #3987e5;
+  --stage-interviewing: #1c5cab;
+  --stage-offer: #007a5e;
+  --stage-rejected-lm: #855000;
+  --stage-rejected-dm: #d4a03f;
+  --stage-rejected: var(--stage-rejected-lm);
+
+  --error-bg: #fef2f2;
+  --error-text: #b91c1c;
+  --error-border: #fecaca;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --surface: #1a1a19;
+    --plane: #0d0d0d;
+    --card: #232322;
+    --ink: #ffffff;
+    --ink-secondary: #c3c2b7;
+    --ink-muted: #898781;
+    --border: rgba(255, 255, 255, 0.12);
+    --accent: var(--accent-dm);
+    --stage-rejected: var(--stage-rejected-dm);
+    --error-bg: #3f1d1d;
+    --error-text: #fca5a5;
+    --error-border: #7f1d1d;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface: #1a1a19;
+  --plane: #0d0d0d;
+  --card: #232322;
+  --ink: #ffffff;
+  --ink-secondary: #c3c2b7;
+  --ink-muted: #898781;
+  --border: rgba(255, 255, 255, 0.12);
+  --accent: var(--accent-dm);
+  --stage-rejected: var(--stage-rejected-dm);
+  --error-bg: #3f1d1d;
+  --error-text: #fca5a5;
+  --error-border: #7f1d1d;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --surface: #ffffff;
+  --plane: #f9f9f7;
+  --card: #ffffff;
+  --ink: #0b0b0b;
+  --ink-secondary: #52514e;
+  --ink-muted: #898781;
+  --border: rgba(11, 11, 11, 0.10);
+  --accent: var(--accent-lm);
+  --stage-rejected: var(--stage-rejected-lm);
+  --error-bg: #fef2f2;
+  --error-text: #b91c1c;
+  --error-border: #fecaca;
+}
+
+@theme inline {
+  --color-surface: var(--surface);
+  --color-plane: var(--plane);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-ink-muted: var(--ink-muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-solid: var(--accent-solid);
+  --color-stage-saved: var(--stage-saved);
+  --color-stage-applied: var(--stage-applied);
+  --color-stage-interviewing: var(--stage-interviewing);
+  --color-stage-offer: var(--stage-offer);
+  --color-stage-rejected: var(--stage-rejected);
+  --color-error-bg: var(--error-bg);
+  --color-error-text: var(--error-text);
+  --color-error-border: var(--error-border);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--plane);
+  color: var(--ink);
+  font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+}
