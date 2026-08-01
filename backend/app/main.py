@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import applications, jobs, resumes
+from app.routers import ai, applications, jobs, resumes
 
 app = FastAPI(title="Career Quest API")
 
@@ -15,6 +15,7 @@ app.add_middleware(
 app.include_router(resumes.router)
 app.include_router(jobs.router)
 app.include_router(applications.router)
+app.include_router(ai.router)
 
 
 @app.get("/health")

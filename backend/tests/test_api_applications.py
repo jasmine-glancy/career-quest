@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from app.models import Application, ApplicationStatus, Company, Job, Resume, ResumeVersion, User
+from app.models import AIAnalysis, Application, ApplicationStatus, Company, Job, Resume, ResumeVersion, User
 
 
 def _make_user_and_job(db_session, user_name="Test User", user_email="applicant@example.com"):
@@ -235,3 +235,49 @@ def test_patch_status_full_valid_pipeline_walk(client, db_session):
         response = client.patch(f"/applications/{app_id}/status", json={"status": status})
         assert response.status_code == 200, response.json()
         assert response.json()["status"] == status
+
+
+# --- GET /applications/{id}/analysis ---
+
+
+def test_get_latest_analysis_returns_most_recent(client, db_session):
+    application = _make_application(db_session)
+    older = AIAnalysis(
+        application_id=application.application_id,
+        match_score=50,
+        strengths_json=["a"],
+        gaps_json=["b"],
+        recommendations_json=["c"],
+    )
+    db_session.add(older)
+    db_session.commit()
+    newer = AIAnalysis(
+        application_id=application.application_id,
+        match_score=90,
+        strengths_json=["x"],
+        gaps_json=["y"],
+        recommendations_json=["z"],
+    )
+    db_session.add(newer)
+    db_session.commit()
+
+    response = client.get(f"/applications/{application.application_id}/analysis")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["analysis_id"] == newer.analysis_id
+    assert body["match_score"] == 90
+
+
+def test_get_latest_analysis_404_when_none_exists(client, db_session):
+    application = _make_application(db_session)
+
+    response = client.get(f"/applications/{application.application_id}/analysis")
+
+    assert response.status_code == 404
+
+
+def test_get_latest_analysis_404_when_application_missing(client):
+    response = client.get("/applications/999999/analysis")
+
+    assert response.status_code == 404

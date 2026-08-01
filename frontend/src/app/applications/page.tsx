@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { getApplications } from "@/lib/api";
 import { DEV_USER_ID } from "@/lib/config";
 import { STATUS_DOT_CLASS, STATUS_LABELS } from "@/lib/statusColor";
@@ -32,7 +34,11 @@ export default async function ApplicationsPage() {
           <tbody>
             {applications.map((application) => (
               <tr key={application.application_id} className="border-b border-border">
-                <td className="py-2 pr-4">{application.job_title}</td>
+                <td className="py-2 pr-4">
+                  <Link href={`/jobs/${application.job_id}`} className="text-accent hover:underline">
+                    {application.job_title}
+                  </Link>
+                </td>
                 <td className="py-2 pr-4">{application.company_name}</td>
                 <td className="py-2 pr-4">
                   <span className="inline-flex items-center gap-2">

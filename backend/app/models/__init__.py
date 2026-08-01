@@ -1,3 +1,4 @@
+from app.models.ai_analysis import AIAnalysis
 from app.models.application import ALLOWED_STATUS_TRANSITIONS, Application, ApplicationStatus
 from app.models.company import Company
 from app.models.job import Job
@@ -9,6 +10,7 @@ from app.models.user import User
 
 __all__ = [
     "ALLOWED_STATUS_TRANSITIONS",
+    "AIAnalysis",
     "Application",
     "ApplicationStatus",
     "Company",

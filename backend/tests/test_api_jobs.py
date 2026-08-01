@@ -15,6 +15,7 @@ def test_create_job_creates_new_company(client, db_session):
     body = response.json()
     assert body["title"] == "Engineer"
     assert body["location"] == "Remote"
+    assert body["company_name"] == "Brand New Co"
 
     companies = db_session.query(Company).filter(Company.name == "Brand New Co").all()
     assert len(companies) == 1
@@ -71,3 +72,26 @@ def test_get_or_create_company_concurrent_same_name_no_duplicate(test_engine, db
     assert not errors, errors
     assert len(company_ids) == 2
     assert company_ids[0] == company_ids[1]
+
+
+# --- GET /jobs/{id} ---
+
+
+def test_get_job_returns_job_with_company_name(client, db_session):
+    created = client.post(
+        "/jobs", json={"company_name": "Acme Corp", "title": "Engineer", "description": "Build things"}
+    ).json()
+
+    response = client.get(f"/jobs/{created['job_id']}")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["title"] == "Engineer"
+    assert body["description"] == "Build things"
+    assert body["company_name"] == "Acme Corp"
+
+
+def test_get_job_unknown_id_returns_404(client):
+    response = client.get("/jobs/999999")
+
+    assert response.status_code == 404

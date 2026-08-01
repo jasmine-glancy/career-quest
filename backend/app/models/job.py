@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import DateTime, ForeignKey, String, Text, func
+from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -19,5 +20,6 @@ class Job(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     company: Mapped["Company"] = relationship(back_populates="jobs")
+    company_name = association_proxy("company", "name")
     applications: Mapped[list["Application"]] = relationship(back_populates="job", cascade="all, delete-orphan")
     skills: Mapped[list["Skill"]] = relationship(secondary=job_skills, back_populates="jobs")

@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 
 from app.deps import get_db
-from app.models import ALLOWED_STATUS_TRANSITIONS, Application, ApplicationStatus, Job, ResumeVersion, User
+from app.models import ALLOWED_STATUS_TRANSITIONS, AIAnalysis, Application, ApplicationStatus, Job, ResumeVersion, User
+from app.schemas.ai_analysis import AIAnalysisRead
 from app.schemas.application import (
     ApplicationCreate,
     ApplicationListItem,
@@ -95,3 +96,20 @@ def update_application_status(
     db.commit()
     db.refresh(application)
     return application
+
+
+@router.get("/{application_id}/analysis", response_model=AIAnalysisRead)
+def get_latest_analysis(application_id: int, db: Session = Depends(get_db)) -> AIAnalysis:
+    application = db.get(Application, application_id)
+    if application is None:
+        raise HTTPException(status_code=404, detail=f"Application {application_id} not found")
+
+    analysis = (
+        db.query(AIAnalysis)
+        .filter(AIAnalysis.application_id == application_id)
+        .order_by(AIAnalysis.created_at.desc(), AIAnalysis.analysis_id.desc())
+        .first()
+    )
+    if analysis is None:
+        raise HTTPException(status_code=404, detail=f"No analysis yet for application {application_id}")
+    return analysis
