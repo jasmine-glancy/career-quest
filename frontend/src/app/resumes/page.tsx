@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { getResumes, getResumeVersions } from "@/lib/api";
 import { DEV_USER_ID } from "@/lib/config";
 
@@ -24,7 +26,11 @@ export default async function ResumesPage() {
             return (
               <li key={resume.resume_id} className="rounded-lg border border-border bg-surface p-4">
                 <div className="flex items-baseline justify-between">
-                  <h2 className="font-medium">{resume.title}</h2>
+                  <h2 className="font-medium">
+                    <Link href={`/resume/${resume.resume_id}`} className="text-accent hover:underline">
+                      {resume.title}
+                    </Link>
+                  </h2>
                   <span className="text-sm text-ink-muted">
                     {versions.length} version{versions.length === 1 ? "" : "s"}
                   </span>

@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.deps import get_db
 from app.models import Company, Job
@@ -42,4 +42,12 @@ def create_job(payload: JobCreate, db: Session = Depends(get_db)) -> Job:
     db.add(job)
     db.commit()
     db.refresh(job)
+    return job
+
+
+@router.get("/{job_id}", response_model=JobRead)
+def get_job(job_id: int, db: Session = Depends(get_db)) -> Job:
+    job = db.query(Job).options(joinedload(Job.company)).filter(Job.job_id == job_id).one_or_none()
+    if job is None:
+        raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
     return job

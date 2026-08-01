@@ -29,3 +29,35 @@ export interface ApplicationListItem {
   applied_at: string | null;
   created_at: string;
 }
+
+export interface Job {
+  job_id: number;
+  company_id: number;
+  company_name: string;
+  title: string;
+  description: string | null;
+  url: string | null;
+  location: string | null;
+  created_at: string;
+}
+
+export interface AIAnalysis {
+  analysis_id: number;
+  application_id: number;
+  match_score: number;
+  strengths_json: string[];
+  gaps_json: string[];
+  recommendations_json: string[];
+  created_at: string;
+}
+
+export interface ResumeEdit {
+  section: string;
+  suggestion: string;
+}
+
+export interface OptimizeResumeResult {
+  summary: string;
+  suggested_edits: ResumeEdit[];
+  missing_keywords: string[];
+}

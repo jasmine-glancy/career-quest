@@ -14,6 +14,7 @@ class JobCreate(BaseModel):
 class JobRead(BaseModel):
     job_id: int
     company_id: int
+    company_name: str
     title: str
     description: str | None
     url: str | None

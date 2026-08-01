@@ -1,6 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getApplications, getResumeVersions, getResumes, updateApplicationStatus } from "./api";
+import {
+  analyzeFit,
+  getApplications,
+  getJob,
+  getLatestAnalysis,
+  getResumeVersions,
+  getResumes,
+  optimizeResume,
+  updateApplicationStatus,
+} from "./api";
 
 function mockFetchOnce(response: Partial<Response> & { json?: () => Promise<unknown> }) {
   const fetchMock = vi.fn().mockResolvedValue(response as Response);
@@ -100,5 +109,107 @@ describe("api client", () => {
     await expect(updateApplicationStatus(3, "rejected")).rejects.toThrow(
       "Failed to update status (500)",
     );
+  });
+
+  it("getJob requests the job-scoped URL", async () => {
+    const fetchMock = mockFetchOnce({ ok: true, json: async () => ({ job_id: 9 }) });
+
+    await getJob(9);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:8000/jobs/9",
+      expect.objectContaining({ cache: "no-store" }),
+    );
+  });
+
+  it("getJob returns null on a 404 instead of throwing", async () => {
+    mockFetchOnce({ ok: false, status: 404 });
+
+    await expect(getJob(9)).resolves.toBeNull();
+  });
+
+  it("getJob throws on a non-404 error", async () => {
+    mockFetchOnce({ ok: false, status: 500 });
+
+    await expect(getJob(9)).rejects.toThrow("Failed to load job (500)");
+  });
+
+  it("getLatestAnalysis returns null on a 404 instead of throwing", async () => {
+    mockFetchOnce({ ok: false, status: 404 });
+
+    await expect(getLatestAnalysis(4)).resolves.toBeNull();
+  });
+
+  it("getLatestAnalysis returns parsed JSON on success", async () => {
+    const payload = { analysis_id: 1, application_id: 4, match_score: 70 };
+    const fetchMock = mockFetchOnce({ ok: true, json: async () => payload });
+
+    const result = await getLatestAnalysis(4);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:8000/applications/4/analysis",
+      expect.objectContaining({ cache: "no-store" }),
+    );
+    expect(result).toEqual(payload);
+  });
+
+  it("getLatestAnalysis throws on a non-404 error", async () => {
+    mockFetchOnce({ ok: false, status: 500 });
+
+    await expect(getLatestAnalysis(4)).rejects.toThrow("Failed to load analysis (500)");
+  });
+
+  it("analyzeFit POSTs the user/job/resume-version ids", async () => {
+    const payload = { analysis_id: 1, match_score: 80 };
+    const fetchMock = mockFetchOnce({ ok: true, json: async () => payload });
+
+    const result = await analyzeFit(3, 7, 1);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:8000/ai/analyze-fit",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ user_id: 3, job_id: 7, resume_version_id: 1 }),
+      }),
+    );
+    expect(result).toEqual(payload);
+  });
+
+  it("analyzeFit surfaces the backend's detail message on failure", async () => {
+    mockFetchOnce({
+      ok: false,
+      status: 400,
+      json: async () => ({ detail: "Resume version 1 does not belong to user 3" }),
+    });
+
+    await expect(analyzeFit(3, 7, 1)).rejects.toThrow(
+      "Resume version 1 does not belong to user 3",
+    );
+  });
+
+  it("optimizeResume POSTs the user/resume-version/job ids", async () => {
+    const payload = { summary: "ok", suggested_edits: [], missing_keywords: [] };
+    const fetchMock = mockFetchOnce({ ok: true, json: async () => payload });
+
+    const result = await optimizeResume(3, 2, 10);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:8000/ai/optimize-resume",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ user_id: 3, resume_version_id: 2, job_id: 10 }),
+      }),
+    );
+    expect(result).toEqual(payload);
+  });
+
+  it("optimizeResume surfaces the backend's detail message on failure", async () => {
+    mockFetchOnce({
+      ok: false,
+      status: 404,
+      json: async () => ({ detail: "Job 10 not found" }),
+    });
+
+    await expect(optimizeResume(3, 2, 10)).rejects.toThrow("Job 10 not found");
   });
 });

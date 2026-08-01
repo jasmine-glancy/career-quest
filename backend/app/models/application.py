@@ -43,3 +43,4 @@ class Application(Base):
     job: Mapped["Job"] = relationship(back_populates="applications")
     resume_version: Mapped["ResumeVersion | None"] = relationship(back_populates="applications")
     notes: Mapped[list["Note"]] = relationship(back_populates="application", cascade="all, delete-orphan")
+    analyses: Mapped[list["AIAnalysis"]] = relationship(back_populates="application", cascade="all, delete-orphan")
