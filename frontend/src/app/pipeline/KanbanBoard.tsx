@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   DndContext,
   type DragEndEvent,
+  KeyboardSensor,
   PointerSensor,
   useDraggable,
   useDroppable,
@@ -113,6 +114,7 @@ export function KanbanBoard({
   const [error, setError] = useState<string | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor),
   );
 
   async function handleDragEnd(event: DragEndEvent) {

@@ -155,8 +155,19 @@ above) — the frontend reads `NEXT_PUBLIC_API_BASE_URL` from `frontend/.env.loc
 seeded dev user (`DEV_USER_ID = 1` in `src/lib/config.ts`).
 
 Pages: `/applications` (table), `/resumes` (list with version history), `/pipeline`
-(kanban board — drag a card to change its status; illegal moves are rejected by the
-backend and the card snaps back with an error banner).
+(kanban board — drag a card to change its status, by pointer or keyboard; illegal
+moves are rejected by the backend and the card snaps back with an error banner).
+
+### Tests
+
+```
+npm test
+```
+
+Runs the Vitest suite (`lib/statusColor`, `lib/api`, `ThemeToggle`, `KanbanBoard`).
+No backend or Postgres needed — `@/lib/api` and `@dnd-kit/core` are mocked so the
+board's optimistic-update/revert logic and the theme toggle's persistence are
+tested directly, without simulating real pointer drags or network calls.
 
 ### Theme
 
