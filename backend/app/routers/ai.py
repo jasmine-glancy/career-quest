@@ -59,10 +59,10 @@ def analyze_fit(payload: AnalyzeFitRequest, db: Session = Depends(get_db)) -> AI
 
     analysis = AIAnalysis(
         application_id=application.application_id,
-        match_score=result["match_score"],
-        strengths_json=result["strengths"],
-        gaps_json=result["gaps"],
-        recommendations_json=result["recommendations"],
+        match_score=result.match_score,
+        strengths_json=result.strengths,
+        gaps_json=result.gaps,
+        recommendations_json=result.recommendations,
     )
     db.add(analysis)
     db.commit()
@@ -90,8 +90,6 @@ def optimize_resume(payload: OptimizeResumeRequest, db: Session = Depends(get_db
         raise HTTPException(status_code=404, detail=f"Job {payload.job_id} not found")
 
     try:
-        result = generate_resume_optimization(resume_version.snapshot_json, job.title, job.description)
+        return generate_resume_optimization(resume_version.snapshot_json, job.title, job.description)
     except AIServiceError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
-
-    return OptimizeResumeResponse(**result)

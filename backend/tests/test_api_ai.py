@@ -1,19 +1,20 @@
 import app.routers.ai as ai_router
 from app.models import AIAnalysis, Application, ApplicationStatus, Company, Job, Resume, ResumeVersion, User
+from app.schemas.ai_analysis import JobFitAnalysisResult, OptimizeResumeResponse
 from app.services.ai_analysis import AIServiceError
 
-ANALYSIS_RESULT = {
-    "match_score": 82,
-    "strengths": ["Strong SQL"],
-    "gaps": ["No AWS"],
-    "recommendations": ["Add AWS"],
-}
+ANALYSIS_RESULT = JobFitAnalysisResult(
+    match_score=82,
+    strengths=["Strong SQL"],
+    gaps=["No AWS"],
+    recommendations=["Add AWS"],
+)
 
-OPTIMIZE_RESULT = {
-    "summary": "Solid overall fit.",
-    "suggested_edits": [{"section": "Experience", "suggestion": "Add metrics."}],
-    "missing_keywords": ["dbt"],
-}
+OPTIMIZE_RESULT = OptimizeResumeResponse(
+    summary="Solid overall fit.",
+    suggested_edits=[{"section": "Experience", "suggestion": "Add metrics."}],
+    missing_keywords=["dbt"],
+)
 
 
 def _make_user_and_job(db_session, user_name="Test User", user_email="applicant@example.com"):

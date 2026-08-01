@@ -39,10 +39,13 @@ export async function getResumeVersions(resumeId: number): Promise<ResumeVersion
   return res.json();
 }
 
-export async function getJob(jobId: number): Promise<Job> {
+export async function getJob(jobId: number): Promise<Job | null> {
   const res = await fetch(`${API_BASE_URL}/jobs/${jobId}`, {
     cache: "no-store",
   });
+  if (res.status === 404) {
+    return null;
+  }
   if (!res.ok) {
     throw new Error(`Failed to load job (${res.status})`);
   }

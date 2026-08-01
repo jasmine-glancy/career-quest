@@ -122,10 +122,16 @@ describe("api client", () => {
     );
   });
 
-  it("getJob throws with the status code on a non-ok response", async () => {
+  it("getJob returns null on a 404 instead of throwing", async () => {
     mockFetchOnce({ ok: false, status: 404 });
 
-    await expect(getJob(9)).rejects.toThrow("Failed to load job (404)");
+    await expect(getJob(9)).resolves.toBeNull();
+  });
+
+  it("getJob throws on a non-404 error", async () => {
+    mockFetchOnce({ ok: false, status: 500 });
+
+    await expect(getJob(9)).rejects.toThrow("Failed to load job (500)");
   });
 
   it("getLatestAnalysis returns null on a 404 instead of throwing", async () => {

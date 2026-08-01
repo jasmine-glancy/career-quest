@@ -19,7 +19,7 @@ export default async function JobDetailPage({
     notFound();
   }
 
-  const job = await getJob(jobId).catch(() => null);
+  const job = await getJob(jobId);
   if (job === null) {
     notFound();
   }

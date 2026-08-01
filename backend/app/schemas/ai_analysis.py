@@ -9,6 +9,13 @@ class AnalyzeFitRequest(BaseModel):
     resume_version_id: int
 
 
+class JobFitAnalysisResult(BaseModel):
+    match_score: int
+    strengths: list[str]
+    gaps: list[str]
+    recommendations: list[str]
+
+
 class AIAnalysisRead(BaseModel):
     analysis_id: int
     application_id: int

@@ -80,6 +80,12 @@ export function JobFitAnalyzer({
         </button>
       </div>
 
+      <p className="text-xs text-ink-muted">
+        Analyzing sends this resume&apos;s content and the job description to OpenAI for
+        processing. Don&apos;t analyze against a resume containing information you don&apos;t
+        want shared with a third party.
+      </p>
+
       {error && (
         <p className="rounded-md border border-error-border bg-error-bg px-3 py-2 text-sm text-error-text">
           {error}

@@ -1,14 +1,21 @@
 import json
+import logging
 from typing import Any
 
 from openai import OpenAI, OpenAIError
+from pydantic import ValidationError
 
 from app.config import settings
+from app.schemas.ai_analysis import JobFitAnalysisResult, OptimizeResumeResponse
+
+logger = logging.getLogger(__name__)
 
 
 class AIServiceError(Exception):
     """Raised when the LLM call fails or returns an unusable response."""
 
+
+GENERIC_FAILURE_MESSAGE = "AI service is temporarily unavailable. Please try again."
 
 JOB_FIT_SYSTEM_PROMPT = (
     "You are a career coach comparing a candidate's resume against a job "
@@ -29,7 +36,7 @@ RESUME_OPTIMIZE_SYSTEM_PROMPT = (
 
 def _client() -> OpenAI:
     if not settings.openai_api_key:
-        raise AIServiceError("OPENAI_API_KEY is not configured")
+        raise AIServiceError(GENERIC_FAILURE_MESSAGE)
     return OpenAI(api_key=settings.openai_api_key)
 
 
@@ -53,39 +60,45 @@ def _chat_json(system_prompt: str, user_prompt: str) -> dict[str, Any]:
             ],
         )
     except OpenAIError as exc:
-        raise AIServiceError(f"OpenAI request failed: {exc}") from exc
+        # The raw exception can echo back request details (e.g. a masked fragment of
+        # the API key on an auth failure) — log it server-side only, never in the
+        # client-facing error.
+        logger.error("OpenAI request failed: %s", exc)
+        raise AIServiceError(GENERIC_FAILURE_MESSAGE) from exc
+
+    if not response.choices:
+        logger.error("OpenAI returned no choices")
+        raise AIServiceError(GENERIC_FAILURE_MESSAGE)
 
     content = response.choices[0].message.content
     if not content:
-        raise AIServiceError("OpenAI returned an empty response")
+        logger.error("OpenAI returned an empty response")
+        raise AIServiceError(GENERIC_FAILURE_MESSAGE)
 
     try:
         return json.loads(content)
     except json.JSONDecodeError as exc:
-        raise AIServiceError(f"OpenAI returned invalid JSON: {exc}") from exc
+        logger.error("OpenAI returned invalid JSON: %s", exc)
+        raise AIServiceError(GENERIC_FAILURE_MESSAGE) from exc
 
 
 def generate_job_fit_analysis(
     resume_snapshot: dict[str, Any], job_title: str, job_description: str | None
-) -> dict[str, Any]:
-    result = _chat_json(JOB_FIT_SYSTEM_PROMPT, _build_context(resume_snapshot, job_title, job_description))
-
-    required_keys = {"match_score", "strengths", "gaps", "recommendations"}
-    missing = required_keys - result.keys()
-    if missing:
-        raise AIServiceError(f"OpenAI response missing required keys: {missing}")
-    return result
+) -> JobFitAnalysisResult:
+    raw = _chat_json(JOB_FIT_SYSTEM_PROMPT, _build_context(resume_snapshot, job_title, job_description))
+    try:
+        return JobFitAnalysisResult.model_validate(raw)
+    except ValidationError as exc:
+        logger.error("OpenAI response failed validation: %s", exc)
+        raise AIServiceError(GENERIC_FAILURE_MESSAGE) from exc
 
 
 def generate_resume_optimization(
     resume_snapshot: dict[str, Any], job_title: str, job_description: str | None
-) -> dict[str, Any]:
-    result = _chat_json(
-        RESUME_OPTIMIZE_SYSTEM_PROMPT, _build_context(resume_snapshot, job_title, job_description)
-    )
-
-    required_keys = {"summary", "suggested_edits", "missing_keywords"}
-    missing = required_keys - result.keys()
-    if missing:
-        raise AIServiceError(f"OpenAI response missing required keys: {missing}")
-    return result
+) -> OptimizeResumeResponse:
+    raw = _chat_json(RESUME_OPTIMIZE_SYSTEM_PROMPT, _build_context(resume_snapshot, job_title, job_description))
+    try:
+        return OptimizeResumeResponse.model_validate(raw)
+    except ValidationError as exc:
+        logger.error("OpenAI response failed validation: %s", exc)
+        raise AIServiceError(GENERIC_FAILURE_MESSAGE) from exc
