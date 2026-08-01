@@ -34,8 +34,8 @@ def get_dashboard(user_id: int, db: Session = Depends(get_db)) -> DashboardRead:
     matched_counts: Counter[str] = Counter()
     missing_counts: Counter[str] = Counter()
     for analysis in latest_analyses:
-        matched_counts.update(set(analysis.matched_skills_json))
-        missing_counts.update(set(analysis.missing_skills_json))
+        matched_counts.update({skill.strip() for skill in analysis.matched_skills_json if skill.strip()})
+        missing_counts.update({skill.strip() for skill in analysis.missing_skills_json if skill.strip()})
 
     strongest_skill = None
     if matched_counts:
