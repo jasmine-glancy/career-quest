@@ -3,6 +3,7 @@ import type {
   AIAnalysis,
   ApplicationListItem,
   ApplicationStatus,
+  Dashboard,
   Job,
   OptimizeResumeResult,
   Resume,
@@ -35,6 +36,16 @@ export async function getResumeVersions(resumeId: number): Promise<ResumeVersion
   });
   if (!res.ok) {
     throw new Error(`Failed to load resume versions (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function getDashboard(userId: number): Promise<Dashboard> {
+  const res = await fetch(`${API_BASE_URL}/dashboard?user_id=${userId}`, {
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to load dashboard (${res.status})`);
   }
   return res.json();
 }

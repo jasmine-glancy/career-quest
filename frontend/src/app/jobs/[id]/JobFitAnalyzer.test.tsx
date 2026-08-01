@@ -53,6 +53,8 @@ describe("JobFitAnalyzer", () => {
           strengths_json: ["Strong SQL"],
           gaps_json: ["No AWS"],
           recommendations_json: ["Add AWS"],
+          matched_skills_json: ["SQL"],
+          missing_skills_json: ["AWS"],
           created_at: "2026-01-01T00:00:00Z",
         }}
       />,
@@ -71,6 +73,8 @@ describe("JobFitAnalyzer", () => {
       strengths_json: ["Python"],
       gaps_json: ["Cloud"],
       recommendations_json: ["Learn AWS"],
+      matched_skills_json: ["Python"],
+      missing_skills_json: ["Cloud"],
       created_at: "2026-01-01T00:00:00Z",
     });
     const user = userEvent.setup();

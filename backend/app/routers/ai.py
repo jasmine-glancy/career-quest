@@ -63,6 +63,8 @@ def analyze_fit(payload: AnalyzeFitRequest, db: Session = Depends(get_db)) -> AI
         strengths_json=result.strengths,
         gaps_json=result.gaps,
         recommendations_json=result.recommendations,
+        matched_skills_json=result.matched_skills,
+        missing_skills_json=result.missing_skills,
     )
     db.add(analysis)
     db.commit()

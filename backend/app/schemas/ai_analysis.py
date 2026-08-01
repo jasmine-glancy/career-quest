@@ -14,6 +14,8 @@ class JobFitAnalysisResult(BaseModel):
     strengths: list[str]
     gaps: list[str]
     recommendations: list[str]
+    matched_skills: list[str]
+    missing_skills: list[str]
 
 
 class AIAnalysisRead(BaseModel):
@@ -23,6 +25,8 @@ class AIAnalysisRead(BaseModel):
     strengths_json: list[str]
     gaps_json: list[str]
     recommendations_json: list[str]
+    matched_skills_json: list[str]
+    missing_skills_json: list[str]
     created_at: datetime
 
     model_config = {"from_attributes": True}

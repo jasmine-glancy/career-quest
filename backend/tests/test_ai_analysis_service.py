@@ -12,7 +12,7 @@ from app.services.ai_analysis import (
 
 VALID_JOB_FIT_JSON = (
     '{"match_score": 82, "strengths": ["Strong SQL"], "gaps": ["No AWS"], '
-    '"recommendations": ["Add AWS"]}'
+    '"recommendations": ["Add AWS"], "matched_skills": ["SQL"], "missing_skills": ["AWS"]}'
 )
 VALID_OPTIMIZE_JSON = (
     '{"summary": "Solid fit.", "suggested_edits": '
@@ -114,6 +114,8 @@ def test_generate_job_fit_analysis_returns_validated_result(monkeypatch):
     assert isinstance(result, JobFitAnalysisResult)
     assert result.match_score == 82
     assert result.strengths == ["Strong SQL"]
+    assert result.matched_skills == ["SQL"]
+    assert result.missing_skills == ["AWS"]
 
 
 def test_generate_job_fit_analysis_missing_key_raises_generic_error(monkeypatch):
@@ -125,10 +127,25 @@ def test_generate_job_fit_analysis_missing_key_raises_generic_error(monkeypatch)
     assert str(exc_info.value) == GENERIC_FAILURE_MESSAGE
 
 
+def test_generate_job_fit_analysis_missing_skill_tags_raises_generic_error(monkeypatch):
+    # Older-shape response with the prose fields but no matched_skills/missing_skills
+    bad_json = (
+        '{"match_score": 82, "strengths": ["Strong SQL"], "gaps": ["No AWS"], '
+        '"recommendations": ["Add AWS"]}'
+    )
+    _patch_client(monkeypatch, response=_FakeResponse(content=bad_json))
+
+    with pytest.raises(AIServiceError) as exc_info:
+        generate_job_fit_analysis({"summary": "..."}, "Engineer", "Do things")
+
+    assert str(exc_info.value) == GENERIC_FAILURE_MESSAGE
+
+
 def test_generate_job_fit_analysis_wrong_type_raises_generic_error(monkeypatch):
     # match_score as a non-numeric string can't coerce to int
     bad_json = (
-        '{"match_score": "not-a-number", "strengths": [], "gaps": [], "recommendations": []}'
+        '{"match_score": "not-a-number", "strengths": [], "gaps": [], "recommendations": [], '
+        '"matched_skills": [], "missing_skills": []}'
     )
     _patch_client(monkeypatch, response=_FakeResponse(content=bad_json))
 
@@ -139,7 +156,10 @@ def test_generate_job_fit_analysis_wrong_type_raises_generic_error(monkeypatch):
 
 
 def test_generate_job_fit_analysis_non_list_strengths_raises_generic_error(monkeypatch):
-    bad_json = '{"match_score": 80, "strengths": "not a list", "gaps": [], "recommendations": []}'
+    bad_json = (
+        '{"match_score": 80, "strengths": "not a list", "gaps": [], "recommendations": [], '
+        '"matched_skills": [], "missing_skills": []}'
+    )
     _patch_client(monkeypatch, response=_FakeResponse(content=bad_json))
 
     with pytest.raises(AIServiceError):
