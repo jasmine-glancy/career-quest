@@ -181,17 +181,17 @@ describe("api client", () => {
     );
   });
 
-  it("optimizeResume POSTs the resume-version/job ids", async () => {
+  it("optimizeResume POSTs the user/resume-version/job ids", async () => {
     const payload = { summary: "ok", suggested_edits: [], missing_keywords: [] };
     const fetchMock = mockFetchOnce({ ok: true, json: async () => payload });
 
-    const result = await optimizeResume(2, 10);
+    const result = await optimizeResume(3, 2, 10);
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:8000/ai/optimize-resume",
       expect.objectContaining({
         method: "POST",
-        body: JSON.stringify({ resume_version_id: 2, job_id: 10 }),
+        body: JSON.stringify({ user_id: 3, resume_version_id: 2, job_id: 10 }),
       }),
     );
     expect(result).toEqual(payload);
@@ -204,6 +204,6 @@ describe("api client", () => {
       json: async () => ({ detail: "Job 10 not found" }),
     });
 
-    await expect(optimizeResume(2, 10)).rejects.toThrow("Job 10 not found");
+    await expect(optimizeResume(3, 2, 10)).rejects.toThrow("Job 10 not found");
   });
 });

@@ -80,13 +80,14 @@ export async function analyzeFit(
 }
 
 export async function optimizeResume(
+  userId: number,
   resumeVersionId: number,
   jobId: number,
 ): Promise<OptimizeResumeResult> {
   const res = await fetch(`${API_BASE_URL}/ai/optimize-resume`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ resume_version_id: resumeVersionId, job_id: jobId }),
+    body: JSON.stringify({ user_id: userId, resume_version_id: resumeVersionId, job_id: jobId }),
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));

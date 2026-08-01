@@ -182,7 +182,8 @@ def test_optimize_resume_success(client, db_session, monkeypatch):
     version = _make_resume_version(db_session, user)
 
     response = client.post(
-        "/ai/optimize-resume", json={"resume_version_id": version.resume_version_id, "job_id": job.job_id}
+        "/ai/optimize-resume",
+        json={"user_id": user.user_id, "resume_version_id": version.resume_version_id, "job_id": job.job_id},
     )
 
     assert response.status_code == 200
@@ -192,11 +193,25 @@ def test_optimize_resume_success(client, db_session, monkeypatch):
     assert body["missing_keywords"] == ["dbt"]
 
 
+def test_optimize_resume_unknown_user_returns_404(client, db_session):
+    user, job = _make_user_and_job(db_session)
+    version = _make_resume_version(db_session, user)
+
+    response = client.post(
+        "/ai/optimize-resume",
+        json={"user_id": 9999, "resume_version_id": version.resume_version_id, "job_id": job.job_id},
+    )
+
+    assert response.status_code == 404
+
+
 def test_optimize_resume_unknown_resume_version_returns_404(client, db_session):
-    _, job = _make_user_and_job(db_session)
+    user, job = _make_user_and_job(db_session)
     db_session.commit()
 
-    response = client.post("/ai/optimize-resume", json={"resume_version_id": 9999, "job_id": job.job_id})
+    response = client.post(
+        "/ai/optimize-resume", json={"user_id": user.user_id, "resume_version_id": 9999, "job_id": job.job_id}
+    )
 
     assert response.status_code == 404
 
@@ -206,10 +221,30 @@ def test_optimize_resume_unknown_job_returns_404(client, db_session):
     version = _make_resume_version(db_session, user)
 
     response = client.post(
-        "/ai/optimize-resume", json={"resume_version_id": version.resume_version_id, "job_id": 9999}
+        "/ai/optimize-resume",
+        json={"user_id": user.user_id, "resume_version_id": version.resume_version_id, "job_id": 9999},
     )
 
     assert response.status_code == 404
+
+
+def test_optimize_resume_resume_version_from_different_user_returns_400(client, db_session):
+    owner, job = _make_user_and_job(db_session, user_name="Owner", user_email="owner@example.com")
+    other_user = User(name="Other", email="other@example.com")
+    db_session.add(other_user)
+    db_session.commit()
+    version = _make_resume_version(db_session, owner)
+
+    response = client.post(
+        "/ai/optimize-resume",
+        json={
+            "user_id": other_user.user_id,
+            "resume_version_id": version.resume_version_id,
+            "job_id": job.job_id,
+        },
+    )
+
+    assert response.status_code == 400
 
 
 def test_optimize_resume_returns_502_when_ai_service_fails(client, db_session, monkeypatch):
@@ -221,7 +256,31 @@ def test_optimize_resume_returns_502_when_ai_service_fails(client, db_session, m
     version = _make_resume_version(db_session, user)
 
     response = client.post(
-        "/ai/optimize-resume", json={"resume_version_id": version.resume_version_id, "job_id": job.job_id}
+        "/ai/optimize-resume",
+        json={"user_id": user.user_id, "resume_version_id": version.resume_version_id, "job_id": job.job_id},
     )
 
     assert response.status_code == 502
+
+
+def test_analyze_fit_reuses_earliest_application_when_duplicates_exist(client, db_session, monkeypatch):
+    # POST /applications has no uniqueness constraint on (user_id, job_id), so a user
+    # can legitimately end up tracking the same job twice. The get-or-create lookup
+    # in analyze_fit must not crash (MultipleResultsFound) when that happens.
+    monkeypatch.setattr(ai_router, "generate_job_fit_analysis", lambda *a, **k: ANALYSIS_RESULT)
+    user, job = _make_user_and_job(db_session)
+    version = _make_resume_version(db_session, user)
+    first = Application(user_id=user.user_id, job_id=job.job_id, status=ApplicationStatus.SAVED)
+    db_session.add(first)
+    db_session.commit()
+    second = Application(user_id=user.user_id, job_id=job.job_id, status=ApplicationStatus.SAVED)
+    db_session.add(second)
+    db_session.commit()
+
+    response = client.post(
+        "/ai/analyze-fit",
+        json={"user_id": user.user_id, "job_id": job.job_id, "resume_version_id": version.resume_version_id},
+    )
+
+    assert response.status_code == 201
+    assert response.json()["application_id"] == first.application_id

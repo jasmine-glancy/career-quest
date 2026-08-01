@@ -51,7 +51,7 @@ export default async function ResumeEditorPage({
       <h1 className="text-2xl font-semibold">{resume.title}</h1>
       <p className="text-sm text-ink-muted">Created {formatDate(resume.created_at)}</p>
 
-      <ResumeOptimizer versionOptions={versionOptions} jobOptions={jobOptions} />
+      <ResumeOptimizer userId={DEV_USER_ID} versionOptions={versionOptions} jobOptions={jobOptions} />
     </div>
   );
 }

@@ -36,7 +36,8 @@ def analyze_fit(payload: AnalyzeFitRequest, db: Session = Depends(get_db)) -> AI
     application = (
         db.query(Application)
         .filter(Application.user_id == payload.user_id, Application.job_id == payload.job_id)
-        .one_or_none()
+        .order_by(Application.created_at)
+        .first()
     )
     if application is None:
         application = Application(
@@ -71,9 +72,18 @@ def analyze_fit(payload: AnalyzeFitRequest, db: Session = Depends(get_db)) -> AI
 
 @router.post("/optimize-resume", response_model=OptimizeResumeResponse)
 def optimize_resume(payload: OptimizeResumeRequest, db: Session = Depends(get_db)) -> OptimizeResumeResponse:
+    user = db.get(User, payload.user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail=f"User {payload.user_id} not found")
+
     resume_version = db.get(ResumeVersion, payload.resume_version_id)
     if resume_version is None:
         raise HTTPException(status_code=404, detail=f"Resume version {payload.resume_version_id} not found")
+    if resume_version.resume.user_id != payload.user_id:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Resume version {payload.resume_version_id} does not belong to user {payload.user_id}",
+        )
 
     job = db.get(Job, payload.job_id)
     if job is None:

@@ -16,9 +16,11 @@ interface JobOption {
 }
 
 export function ResumeOptimizer({
+  userId,
   versionOptions,
   jobOptions,
 }: {
+  userId: number;
   versionOptions: VersionOption[];
   jobOptions: JobOption[];
 }) {
@@ -35,7 +37,7 @@ export function ResumeOptimizer({
     setLoading(true);
     setError(null);
     try {
-      const response = await optimizeResume(selectedVersionId, selectedJobId);
+      const response = await optimizeResume(userId, selectedVersionId, selectedJobId);
       setResult(response);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to optimize resume");

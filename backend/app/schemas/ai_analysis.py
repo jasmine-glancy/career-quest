@@ -22,6 +22,7 @@ class AIAnalysisRead(BaseModel):
 
 
 class OptimizeResumeRequest(BaseModel):
+    user_id: int
     resume_version_id: int
     job_id: int
 
