@@ -15,6 +15,15 @@ class ApplicationStatus(str, enum.Enum):
     REJECTED = "rejected"
 
 
+ALLOWED_STATUS_TRANSITIONS: dict[ApplicationStatus, frozenset[ApplicationStatus]] = {
+    ApplicationStatus.SAVED: frozenset({ApplicationStatus.APPLIED, ApplicationStatus.REJECTED}),
+    ApplicationStatus.APPLIED: frozenset({ApplicationStatus.INTERVIEWING, ApplicationStatus.REJECTED}),
+    ApplicationStatus.INTERVIEWING: frozenset({ApplicationStatus.OFFER, ApplicationStatus.REJECTED}),
+    ApplicationStatus.OFFER: frozenset(),
+    ApplicationStatus.REJECTED: frozenset(),
+}
+
+
 class Application(Base):
     __tablename__ = "applications"
 

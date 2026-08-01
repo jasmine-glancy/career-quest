@@ -104,11 +104,23 @@ Endpoints (no auth yet — each request explicitly passes the `user_id` it acts 
 - `GET /resumes?user_id=1` — lists that user's resumes
 - `POST /jobs` — body `{"company_name": "...", "title": "...", "description"?, "url"?, "location"?}` —
   looks up the company by exact name or creates it, then creates the job
+- `POST /applications` — body `{"user_id": 1, "job_id": 1, "resume_version_id"?}` — starts tracking a job at
+  status `saved`; 404 on an unknown user/job/resume version, 400 if the resume version belongs to a
+  different user
+- `GET /applications?user_id=1` — lists a user's pipeline with the job title and company name attached
 - `PATCH /applications/{application_id}/status` — body `{"status": "saved"|"applied"|"interviewing"|"offer"|"rejected"}` —
-  404 if the application doesn't exist; transitioning to `applied` sets `applied_at` if it isn't already set
+  404 if the application doesn't exist; only legal pipeline moves are allowed (see below), enforced with a
+  409 on an illegal one; transitioning to `applied` sets `applied_at` if it isn't already set
 - `GET /health` — liveness check
 
 Interactive docs at `http://127.0.0.1:8000/docs`.
+
+### Pipeline rules (Issue #3)
+
+`saved -> applied -> interviewing -> offer`, in order, no skipping stages. `rejected` is reachable from
+`saved`, `applied`, or `interviewing` (a rejection can happen at any active stage). `offer` and `rejected`
+are terminal — no further transitions once reached. Re-sending the current status is a no-op success.
+See `ALLOWED_STATUS_TRANSITIONS` in `app/models/application.py`.
 
 ## 8. Run the tests
 
