@@ -102,6 +102,10 @@ Endpoints (no auth yet — each request explicitly passes the `user_id` it acts 
 
 - `POST /resumes` — body `{"user_id": 1, "title": "..."}` — 404 if the user doesn't exist
 - `GET /resumes?user_id=1` — lists that user's resumes
+- `POST /resumes/{resume_id}/versions` — body `{"snapshot_json": {...}}` — creates a new version
+  (full snapshot, not a diff) of a resume; 404 if the resume doesn't exist
+- `GET /resumes/{resume_id}/versions` — lists a resume's versions in creation order; 404 if the resume
+  doesn't exist
 - `POST /jobs` — body `{"company_name": "...", "title": "...", "description"?, "url"?, "location"?}` —
   looks up the company by exact name or creates it, then creates the job
 - `POST /applications` — body `{"user_id": 1, "job_id": 1, "resume_version_id"?}` — starts tracking a job at
