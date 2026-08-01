@@ -1,4 +1,4 @@
-from app.models.application import Application, ApplicationStatus
+from app.models.application import ALLOWED_STATUS_TRANSITIONS, Application, ApplicationStatus
 from app.models.company import Company
 from app.models.job import Job
 from app.models.note import Note
@@ -8,6 +8,7 @@ from app.models.skill import Skill
 from app.models.user import User
 
 __all__ = [
+    "ALLOWED_STATUS_TRANSITIONS",
     "Application",
     "ApplicationStatus",
     "Company",
