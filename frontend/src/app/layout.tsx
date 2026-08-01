@@ -23,6 +23,7 @@ const NAV_LINKS = [
   { href: "/applications", label: "Applications" },
   { href: "/resumes", label: "Resumes" },
   { href: "/pipeline", label: "Pipeline" },
+  { href: "/dashboard", label: "Dashboard" },
 ];
 
 export default function RootLayout({

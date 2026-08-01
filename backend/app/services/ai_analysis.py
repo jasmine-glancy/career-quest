@@ -21,8 +21,12 @@ JOB_FIT_SYSTEM_PROMPT = (
     "You are a career coach comparing a candidate's resume against a job "
     "description. Respond ONLY with a JSON object matching this exact shape: "
     '{"match_score": <int 0-100>, "strengths": [<string>, ...], '
-    '"gaps": [<string>, ...], "recommendations": [<string>, ...]}. '
-    "Do not include any other keys or commentary."
+    '"gaps": [<string>, ...], "recommendations": [<string>, ...], '
+    '"matched_skills": [<string>, ...], "missing_skills": [<string>, ...]}. '
+    "matched_skills is a list of short, canonical skill names (e.g. \"SQL\", not "
+    "\"strong SQL experience\") that appear in both the resume and the job. "
+    "missing_skills is a list of short, canonical skill names the job wants that the "
+    "resume does not show. Do not include any other keys or commentary."
 )
 
 RESUME_OPTIMIZE_SYSTEM_PROMPT = (

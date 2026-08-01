@@ -16,6 +16,11 @@ const SECTIONS = [
     title: "Pipeline",
     description: "A kanban board of your applications by status.",
   },
+  {
+    href: "/dashboard",
+    title: "Dashboard",
+    description: "Insights on your strongest skills and biggest gaps.",
+  },
 ];
 
 export default function Home() {

@@ -8,6 +8,8 @@ ANALYSIS_RESULT = JobFitAnalysisResult(
     strengths=["Strong SQL"],
     gaps=["No AWS"],
     recommendations=["Add AWS"],
+    matched_skills=["SQL"],
+    missing_skills=["AWS"],
 )
 
 OPTIMIZE_RESULT = OptimizeResumeResponse(
@@ -62,6 +64,8 @@ def test_analyze_fit_creates_application_when_none_exists(client, db_session, mo
     assert body["strengths_json"] == ["Strong SQL"]
     assert body["gaps_json"] == ["No AWS"]
     assert body["recommendations_json"] == ["Add AWS"]
+    assert body["matched_skills_json"] == ["SQL"]
+    assert body["missing_skills_json"] == ["AWS"]
 
     application = db_session.query(Application).filter(Application.user_id == user.user_id).one()
     assert application.job_id == job.job_id

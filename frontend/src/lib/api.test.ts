@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   analyzeFit,
   getApplications,
+  getDashboard,
   getJob,
   getLatestAnalysis,
   getResumeVersions,
@@ -157,6 +158,25 @@ describe("api client", () => {
     mockFetchOnce({ ok: false, status: 500 });
 
     await expect(getLatestAnalysis(4)).rejects.toThrow("Failed to load analysis (500)");
+  });
+
+  it("getDashboard requests the user-scoped URL", async () => {
+    const payload = { total_analyzed: 0, strongest_skill: null, biggest_gap: null };
+    const fetchMock = mockFetchOnce({ ok: true, json: async () => payload });
+
+    const result = await getDashboard(1);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:8000/dashboard?user_id=1",
+      expect.objectContaining({ cache: "no-store" }),
+    );
+    expect(result).toEqual(payload);
+  });
+
+  it("getDashboard throws with the status code on a non-ok response", async () => {
+    mockFetchOnce({ ok: false, status: 500 });
+
+    await expect(getDashboard(1)).rejects.toThrow("Failed to load dashboard (500)");
   });
 
   it("analyzeFit POSTs the user/job/resume-version ids", async () => {

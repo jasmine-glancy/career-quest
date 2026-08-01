@@ -48,7 +48,21 @@ export interface AIAnalysis {
   strengths_json: string[];
   gaps_json: string[];
   recommendations_json: string[];
+  matched_skills_json: string[];
+  missing_skills_json: string[];
   created_at: string;
+}
+
+export interface SkillInsight {
+  skill: string;
+  count: number;
+  total_analyzed: number;
+}
+
+export interface Dashboard {
+  total_analyzed: number;
+  strongest_skill: SkillInsight | null;
+  biggest_gap: SkillInsight | null;
 }
 
 export interface ResumeEdit {

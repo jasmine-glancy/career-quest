@@ -15,6 +15,8 @@ class AIAnalysis(Base):
     strengths_json: Mapped[list] = mapped_column(JSON, nullable=False)
     gaps_json: Mapped[list] = mapped_column(JSON, nullable=False)
     recommendations_json: Mapped[list] = mapped_column(JSON, nullable=False)
+    matched_skills_json: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    missing_skills_json: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     application: Mapped["Application"] = relationship(back_populates="analyses")
